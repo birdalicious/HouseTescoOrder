@@ -26,9 +26,27 @@ r = requests.get('https://www.tesco.com/groceries/en-GB/trolley', headers={'cook
 soup = BeautifulSoup(r.content, 'html.parser')
 csrf = soup.find('input', attrs={'name': '_csrf'})['value']
 
+#Add cookies from trolley page to the next requests,
+#trolley cookies are needed for the put requests
+for i in r.cookies:
+	add = True
+	for y in tescoCookies:
+		if y.name == i.name:
+			y.value = i.value
+			add = False
+			break
+	if add:
+		tescoCookies.append(i)
+
+
+cookies = ''
+for c in tescoCookies:
+    cookies += c.name + "=" + c.value + "; "
+
 
 ## can add with this
 data = '{"items":[{"id":"292278149","newValue":0,"oldValue":1,"newUnitChoice":"pcs","oldUnitChoice":"pcs"}]}'
+data = '{"items":[]}'
 # data = json.dumps(data)
 r = requests.put("https://www.tesco.com/groceries/en-GB/trolley/items?_method=PUT", headers={'cookie': cookies,
     'x-csrf-token': csrf,
